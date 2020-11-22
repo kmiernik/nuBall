@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<config>
+    <section>
+        <data_file path="/path/to/u238_m_ggg.h5"
+            alias="u" />
+        <time_windows prompt="20 60" delayed="80 400" />
+
+        <gate active="True" isotope="sr94" comment="8+ -> 4+" detectors="ggg"
+            z="835.9 837.9" y="1308.1 1310.1" type="ppp" multi="4" />
+        <gate active="True" isotope="sr94" comment="8+ -> 4+" detectors="ggg"
+            z="835.9 837.9" y="1308.1 1310.1" type="ddp" multi="" />
+        <gate active="True" isotope="sr96" comment="8+ -> 4+" detectors="ggg"
+            z="814.0 816.0" y="976.8 978.8" type="ppp" multi="4" />
+        <gate active="True" isotope="sr96" comment="8+ -> 4+" detectors="ggg"
+            z="814.0 816.0" y="976.8 978.8" type="ddp" multi="" />
+    </section>
+    <section>
+        <data_file path="/path/to/th232_m_ggg.h5"
+            alias="th" />
+        <time_windows prompt="20 60" delayed="80 400" />
+        <gate active="True" isotope="sr94" comment="8+ -> 4+" detectors="ggg"
+            z="835.9 837.9" y="1308.1 1310.1" type="ppp" multi="4" />
+        <gate active="True" isotope="sr94" comment="8+ -> 4+" detectors="ggg"
+            z="835.9 837.9" y="1308.1 1310.1" type="ddp" multi="" />
+        <gate active="True" isotope="sr96" comment="8+ -> 4+" detectors="ggg"
+            z="814.0 816.0" y="976.8 978.8" type="ppp" multi="4" />
+        <gate active="True" isotope="sr96" comment="8+ -> 4+" detectors="ggg"
+            z="814.0 816.0" y="976.8 978.8" type="ddp" multi="" />
+    </section>
+</config>
+
+<!--
+   detectors:
+    "ggg" - Ge-Ge-Ge
+    "lgg" - LaBr - Ge - Ge NOT IMPLEMENTED YET IN THIS VERSION
+    "gll" - Ge - LaBr - LaBr NOT IMPLEMENTED YET IN THIS VERSION
+
+    type:
+    is a three letter word, where 'p' is for prompt, 'd' is for delayed
+    any other letter is all
+    e.g.
+    "ppp" - z-prompt y-prompt projection: prompt
+    "ppd" - z-prompt y-prompt projection: delayed
+    "ddp" - z-delayed y-delayed projection: prompt
+    "pdd" - z-prompt y-delayed projection: delayed
+    "app" - z-any y-prompt z-prompt
+
+    multi:
+    is a limit on a multiplicity of event
+    "" - all
+    "k" - m >= k
+    "k l" - k <= m <= l
+-->

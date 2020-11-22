@@ -1,0 +1,36 @@
+Metadata-Version: 2.1
+Name: nuBall
+Version: 0.0.1
+Summary: nuBall experiment tools
+Home-page: UNKNOWN
+Author: Krzysztof Miernik
+Author-email: k.a.miernik@gmail.com
+License: UNKNOWN
+Description: ===========
+        nuBall
+        ===========
+        
+        This package provides tools for nuBall HDF5 data files gating and
+        analysis. The main script is nucubes.py which calculates gamma-gamma-gamma
+        gates based on xml configuration file (see example file gates.xml)
+        
+        ...
+        
+        Instalation
+        ============
+        
+        This package requires the following modules:
+        * matplotlib
+        * numpy
+        * h5py
+        * optional: numba for better performance
+        
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Topic :: Scientific/Engineering :: Physics
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
