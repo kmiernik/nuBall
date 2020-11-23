@@ -5,7 +5,7 @@ with open("README.txt", "r") as fh:
 
 setuptools.setup(
     name="nuBall",
-    version="0.0.1",
+    version="0.1.0",
     author="Krzysztof Miernik",
     author_email="k.a.miernik@gmail.com",
     description="nuBall experiment tools",
@@ -16,7 +16,7 @@ setuptools.setup(
     package_data={
                     'PicoNuclear': ['docs/*.xml']
                     },
-    scripts=['bin/nucubes.py'],
+    scripts=['bin/nucubes.py', 'bin/qtnuSpectra.py'],
     #entry_points={'console_scripts': ['nucubes = nuBall.nucubes'] },
     classifiers=[
         "Development Status :: 4 - Beta",

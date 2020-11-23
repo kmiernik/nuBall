@@ -1,6 +1,7 @@
 README.txt
 setup.py
 bin/nucubes.py
+bin/qtnuSpectra.py
 nuBall/__init__.py
 nuBall/nugates.py
 nuBall/nugates_numba.py

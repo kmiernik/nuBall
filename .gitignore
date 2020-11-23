@@ -1,5 +1,7 @@
 __pycache__/
 build/
+dist/
 *~
 *.swp
 *.h5
+*.tar.gz

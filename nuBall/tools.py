@@ -20,18 +20,22 @@ def progress_bar(n, n_max, time_to_n=None):
     print(text, end='', flush=True)
 
 
-def list_spectra(fin, attrs=False):
+def list_spectra(fin, attrs=False, verbose=True):
     """
     List all spectra and their attributes in a given file or group
     """
+    result = []
     def print_attrs(name, obj):
         if isinstance(obj, h5py.Dataset):
-            print(name)
-            if attrs:
+            result.append(name)
+            if verbose:
+                print(name)
+            if verbose and attrs:
                 for key, val in obj.attrs.items():
                     print('   {} {}'.format(key, val))
 
     fin.visititems(print_attrs)
+    return result
 
 
 def peaks_function(x, *args):
@@ -70,7 +74,7 @@ def peaks_function(x, *args):
     return y
 
 
-def fit(x, c, r, peaks):
+def fit(x, c, r, peaks, verbose=True):
     """
     Fit gaussian peaks at listed locations to the histogram counts c
     and x-axis x in range r.
@@ -88,7 +92,7 @@ def fit(x, c, r, peaks):
     args = [a, b]
     for p in peaks:
         args.append(p)
-        args.append(c[p])
+        args.append(c[int(p)])
         args.append(1.0)
     popt, pconv = curve_fit(peaks_function, xdata, ydata, p0=[*args])
     pars = []
@@ -97,6 +101,8 @@ def fit(x, c, r, peaks):
     for i in range(n):
         pars.append(popt[i])
         dp.append(numpy.sqrt(pconv[i, i]))
+        if not verbose:
+            continue
         if i == 0:
             print('a', end=' ')
         elif i == 1:
