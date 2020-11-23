@@ -6,10 +6,9 @@ This package provides tools for nuBall HDF5 data files gating and
 analysis. The main script is nucubes.py which calculates gamma-gamma-gamma
 gates based on xml configuration file (see example file gates.xml)
 
-...
 
 Installation
-============
+------------
 
 This package requires the following modules:
 * matplotlib
@@ -28,10 +27,13 @@ $ python setup.py sdist
 ```
 
 Install it to for a local user
+
 ```
 $ pip3 install .
 ```
+
 or system-wide
+
 ```
 $ sudo pip3 install .
 ```
