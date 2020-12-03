@@ -32,11 +32,11 @@ class Window(QMainWindow):
         self.axes = axes
         self.init_axes()
 
-        self.data0, = self.axes.plot([0], [0], ds='steps-mid', 
+        self.data0, = self.axes.plot([0], [0], drawstyle='steps-mid', 
                 color='red', label='')
-        self.data1, = self.axes.plot([0], [0], ds='steps-mid', 
+        self.data1, = self.axes.plot([0], [0], drawstyle='steps-mid', 
                 color='blue', label='')
-        self.data2, = self.axes.plot([0], [0], ds='steps-mid', 
+        self.data2, = self.axes.plot([0], [0], drawstyle='steps-mid', 
                 color='green', label='')
         self.dataf, = self.axes.plot([0], [0], ls='--', color='black')
 
