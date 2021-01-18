@@ -58,7 +58,7 @@ class Window(QMainWindow):
         self.text_file.setReadOnly(True)
 
         self.list_spectra = QListWidget()
-        self.list_spectra.setFixedWidth(200)
+        self.list_spectra.setFixedWidth(270)
         self.list_spectra.itemClicked.connect(self.item_clicked)
 
         self.canvas = FigureCanvas(self.figure)
@@ -192,7 +192,7 @@ class Window(QMainWindow):
         if file_name:
             try:
                 self.data_file = h5py.File(file_name[0], 'r')
-            except OSError as err:
+            except (OSError, ValueError) as err:
                 error_dialog = QMessageBox()
                 error_dialog.setIcon(QMessageBox.Critical)
                 error_dialog.setText(

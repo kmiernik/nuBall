@@ -135,7 +135,8 @@ if __name__ == '__main__':
                     getElementsByTagName('data_file')[0].getAttribute('alias')
 
             try:
-                fin = h5py.File(props['data_file_name'], 'r')
+                fin = h5py.File(props['data_file_name'], 'r', rdcc_nbytes=
+                        640000000)
             except OSError:
                 print('Unable to open file', props['data_file_name'])
                 continue

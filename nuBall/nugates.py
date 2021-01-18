@@ -21,7 +21,7 @@ from nuBall.tools import progress_bar
 
 
 def gegege(fin, gate_z, gate_y, prompt, delayed, gate_m, gate_type,
-           D=4096, E_unit=100, t_unit=1000, chunk_size=10000000):
+           D=4096, E_unit=100, t_unit=1000):
     """
     Calculate Ge-Ge-Ge 1D matrix based on selected gate on Z axis 
      and Y-axis.
@@ -40,7 +40,6 @@ def gegege(fin, gate_z, gate_y, prompt, delayed, gate_m, gate_type,
       to have same units as in data file (if it is e.g. 10 eV than E_unit
       is 100, so the numbers are given in keV)
     * t_unit is for time, as above
-    * chunk_size is the chunk of input file loaded at a time
     """
 
     group = fin['GeGeGe']
@@ -69,6 +68,7 @@ def gegege(fin, gate_z, gate_y, prompt, delayed, gate_m, gate_type,
     for m in multi:
         dataset = group['{}'.format(m)] 
         n = dataset.shape[0]
+        chunk_size = dataset.chunks[0]
         left_pos = 0
         is_something_left = True
         while is_something_left:

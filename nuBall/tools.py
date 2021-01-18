@@ -93,8 +93,12 @@ def fit(x, c, r, peaks, verbose=True):
     for p in peaks:
         args.append(p)
         args.append(c[int(p)])
-        args.append(1.0)
-    popt, pconv = curve_fit(peaks_function, xdata, ydata, p0=[*args])
+        args.append(0.5)
+    try:
+        popt, pconv = curve_fit(peaks_function, xdata, ydata, p0=[*args])
+    except RuntimeError:
+        return [], []
+
     pars = []
     dp = []
     n = len(popt)
