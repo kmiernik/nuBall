@@ -154,7 +154,32 @@ class Window(QMainWindow):
             name = ''
         else:
             data = numpy.array(self.data_file[name])
-    
+            if len(data.shape) == 1:
+                pass
+            elif len(data.shape) == 2:
+                projBox = QMessageBox()
+                projBox.setIcon(QMessageBox.Question)
+                projBox.setWindowTitle('Select projection')
+                projBox.setText('Please select direction of projection of a {} 2D spectrum.'.format(data.shape))
+                projBox.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
+                buttonX = projBox.button(QMessageBox.Yes)
+                buttonX.setText('X')
+                buttonY = projBox.button(QMessageBox.No)
+                buttonY.setText('Y')
+                projBox.exec_()
+
+                if projBox.clickedButton() == buttonX:
+                    data = data.sum(axis=1)
+                elif projBox.clickedButton() == buttonY:
+                    data = data.sum(axis=0)
+            else:
+                data = [0]
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("Warning")
+                msg.setInformativeText('Spectrums with more than two dimensions are not supported!')
+                msg.setWindowTitle("Warning")
+
         self.dataf.set_xdata([0])
         self.dataf.set_ydata([0])
 
