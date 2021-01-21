@@ -109,13 +109,18 @@ class Window(QMainWindow):
         self.button_fit.setFixedWidth(100)
         self.button_fit.clicked.connect(self.fit_clicked)
 
+        self.button_report = QPushButton('Add to report')
+        self.button_report.setFixedWidth(100)
+        self.button_report.clicked.connect(self.report_clicked)
+        self.button_report.setToolTip("Save fit results to 'report.txt'")
+
         layout = QGridLayout()
         layout.addWidget(self.button_load, 0, 0)
         layout.addWidget(self.text_file, 0, 1, 1, 3)
 
         layout.addWidget(self.list_spectra, 1, 0, 2, 1)
-        layout.addWidget(self.canvas, 1, 1, 1, 3)
-        layout.addWidget(self.toolbar, 2, 1, 1, 3)
+        layout.addWidget(self.canvas, 1, 1, 1, 4)
+        layout.addWidget(self.toolbar, 2, 1, 1, 4)
 
         layout.addWidget(self.label_spectrum, 3, 0)
         layout.addWidget(self.combo_spectrum, 4, 0)
@@ -128,6 +133,7 @@ class Window(QMainWindow):
         layout.addWidget(self.input_peaks, 4, 2)
 
         layout.addWidget(self.button_fit, 5, 2)
+        layout.addWidget(self.button_report, 5, 4)
 
         main.setLayout(layout)
 
@@ -302,17 +308,17 @@ class Window(QMainWindow):
             pars, dp = tools.fit(self.data0.get_xdata(), 
                                 self.data0.get_ydata(), 
                                 self.fit_range, self.peaks, verbose=False)
-            text += 'Red - {}:\n'.format(self.data0.get_label())
+            text += '#Red - {}:\n'.format(self.data0.get_label())
         elif self.combo_spectrum.currentText() == 'Blue':
             pars, dp = tools.fit(self.data1.get_xdata(), 
                                 self.data1.get_ydata(), 
                                 self.fit_range, self.peaks, verbose=False)
-            text += 'Blue - {}:\n'.format(self.data1.get_label())
+            text += '#Blue - {}:\n'.format(self.data1.get_label())
         elif self.combo_spectrum.currentText() == 'Green':
             pars, dp = tools.fit(self.data2.get_xdata(), 
                                 self.data2.get_ydata(), 
                                 self.fit_range, self.peaks, verbose=False)
-            text += 'Green - {}:\n'.format(self.data2.get_label())
+            text += '#Green - {}:\n'.format(self.data2.get_label())
         xf = numpy.arange(self.fit_range[0], self.fit_range[1])
         yf = tools.peaks_function(xf, *pars)
         self.dataf.set_xdata(xf)
@@ -337,6 +343,10 @@ class Window(QMainWindow):
             text += '\t{:.2f}\t {:.2f}\n'.format(pars[i], dp[i])
             self.text_fit.setPlainText(text)
 
+
+    def report_clicked(self):
+        with open("report.txt", "a") as report_file:
+            report_file.write(self.text_fit.toPlainText())
 
 
 
