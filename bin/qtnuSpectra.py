@@ -10,12 +10,94 @@ import nuBall.tools as tools
 
 from PyQt5.QtWidgets import (QWidget, QMainWindow, QApplication, QPushButton,
                     QLineEdit, QListWidget, QPlainTextEdit, QLabel, QComboBox, 
-                    QGridLayout, QFileDialog, QMessageBox)
+                    QGridLayout, QFileDialog, QDialog, QCheckBox)
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIntValidator
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+
+class ConfigWindow(QDialog):
+
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.setWindowTitle('Projection settings')
+        self.initUI()
+
+
+    def initUI(self):
+        self.onlyInt = QIntValidator()
+
+        self.label_dir = QLabel()
+        self.label_dir.setText('Direction')
+        self.label_dir.setFixedWidth(100)
+
+        self.check_x = QCheckBox('X', self)
+        self.check_x.setChecked(True)
+        self.check_x.stateChanged.connect(self.check)
+
+        self.check_y = QCheckBox('Y', self)
+        self.check_y.stateChanged.connect(self.check)
+
+        self.input_x0 = QLineEdit()
+        self.input_x0.setText('{}'.format(self.config['x0']))
+        self.input_x0.setFixedWidth(100)
+        self.input_x0.setValidator(self.onlyInt)
+
+        self.label_x = QLabel()
+        self.label_x.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_x.setText('<= gate <')
+        self.label_x.setFixedWidth(100)
+
+        self.input_x1 = QLineEdit()
+        self.input_x1.setText('{}'.format(self.config['x1']))
+        self.input_x1.setFixedWidth(100)
+        self.input_x1.setValidator(self.onlyInt)
+
+        self.button_done = QPushButton('Done')
+        self.button_done.setFixedWidth(100)
+        self.button_done.clicked.connect(self.done_clicked)
+
+        layout = QGridLayout()
+
+        layout.addWidget(self.label_dir, 0, 0)
+        layout.addWidget(self.check_x, 0, 1)
+        layout.addWidget(self.check_y, 0, 2)
+
+        layout.addWidget(self.input_x0, 1, 0)
+        layout.addWidget(self.label_x, 1, 1)
+        layout.addWidget(self.input_x1, 1, 2)
+
+        layout.addWidget(self.button_done, 2, 1)
+
+        self.setLayout(layout)
+
+
+    def check(self, state):
+        if self.sender() == self.check_x:
+            if self.check_x.isChecked():
+                self.check_y.setChecked(False)
+            else:
+                self.check_y.setChecked(True)
+        elif self.sender() == self.check_y:
+            if self.check_y.isChecked():
+                self.check_x.setChecked(False)
+            else:
+                self.check_x.setChecked(True)
+
+
+    def done_clicked(self):
+        if self.check_x.isChecked():
+            self.config['direction'] = 'x'
+        else:
+            self.config['direction'] = 'y'
+        self.config['x0'] = int(self.input_x0.text())
+        self.config['x1'] = int(self.input_x1.text())
+        self.close()
+
 
 
 class Window(QMainWindow):
@@ -163,21 +245,19 @@ class Window(QMainWindow):
             if len(data.shape) == 1:
                 pass
             elif len(data.shape) == 2:
-                projBox = QMessageBox()
-                projBox.setIcon(QMessageBox.Question)
-                projBox.setWindowTitle('Select projection')
-                projBox.setText('Please select direction of projection of a {} 2D spectrum.'.format(data.shape))
-                projBox.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
-                buttonX = projBox.button(QMessageBox.Yes)
-                buttonX.setText('X')
-                buttonY = projBox.button(QMessageBox.No)
-                buttonY.setText('Y')
-                projBox.exec_()
+                config = {'direction' : 'x',
+                          'x0' : 0,
+                          'x1' : data.shape[1]}
+                config_dialog = ConfigWindow(config)
+                config_dialog.exec_()
 
-                if projBox.clickedButton() == buttonX:
-                    data = data.sum(axis=1)
-                elif projBox.clickedButton() == buttonY:
-                    data = data.sum(axis=0)
+                config = config_dialog.config
+                
+                if config['direction'] == 'x':
+                    data = data[:, config['x0']:config['x1']].sum(axis=1)
+                elif config['direction'] == 'y':
+                    data = data[config['x0']:config['x1'], :].sum(axis=0)
+
             else:
                 data = [0]
                 msg = QMessageBox()
