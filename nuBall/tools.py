@@ -92,7 +92,7 @@ def fit(x, c, r, peaks, verbose=True):
     args = [a, b]
     for p in peaks:
         args.append(p)
-        args.append(c[int(p)])
+        args.append(c[int(p)] - a * p - b)
         args.append(0.5)
     try:
         popt, pconv = curve_fit(peaks_function, xdata, ydata, p0=[*args])

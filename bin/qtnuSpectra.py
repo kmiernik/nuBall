@@ -49,7 +49,7 @@ class ConfigWindow(QDialog):
 
         self.label_x = QLabel()
         self.label_x.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_x.setText('<= gate <')
+        self.label_x.setText('<= gate <=')
         self.label_x.setFixedWidth(100)
 
         self.input_x1 = QLineEdit()
@@ -107,6 +107,7 @@ class Window(QMainWindow):
 
         self.data_file = None
         self.fit_range = [0, 0]
+        self.sum_range = [0, 0]
         self.peaks = []
 
         fig, axes = plt.subplots(1, 1, sharex='all')
@@ -188,8 +189,12 @@ class Window(QMainWindow):
         self.combo_spectrum.setCurrentText('Red')
 
         self.button_fit = QPushButton('Fit')
-        self.button_fit.setFixedWidth(100)
+        self.button_fit.setFixedWidth(50)
         self.button_fit.clicked.connect(self.fit_clicked)
+
+        self.button_sum = QPushButton('Sum')
+        self.button_sum.setFixedWidth(50)
+        self.button_sum.clicked.connect(self.sum_clicked)
 
         self.button_report = QPushButton('Add to report')
         self.button_report.setFixedWidth(100)
@@ -201,21 +206,22 @@ class Window(QMainWindow):
         layout.addWidget(self.text_file, 0, 1, 1, 3)
 
         layout.addWidget(self.list_spectra, 1, 0, 2, 1)
-        layout.addWidget(self.canvas, 1, 1, 1, 4)
-        layout.addWidget(self.toolbar, 2, 1, 1, 4)
+        layout.addWidget(self.canvas, 1, 1, 1, 5)
+        layout.addWidget(self.toolbar, 2, 1, 1, 5)
 
         layout.addWidget(self.label_spectrum, 3, 0)
         layout.addWidget(self.combo_spectrum, 4, 0)
 
-        layout.addWidget(self.text_fit, 3, 3, 3, 1)
+        layout.addWidget(self.text_fit, 3, 4, 3, 1)
         layout.addWidget(self.label_range, 3, 1)
-        layout.addWidget(self.input_range, 3, 2)
+        layout.addWidget(self.input_range, 3, 2, 1, 2)
 
         layout.addWidget(self.label_peaks, 4, 1)
-        layout.addWidget(self.input_peaks, 4, 2)
+        layout.addWidget(self.input_peaks, 4, 2, 1, 2)
 
         layout.addWidget(self.button_fit, 5, 2)
-        layout.addWidget(self.button_report, 5, 4)
+        layout.addWidget(self.button_sum, 5, 3)
+        layout.addWidget(self.button_report, 5, 5)
 
         main.setLayout(layout)
 
@@ -254,9 +260,9 @@ class Window(QMainWindow):
                 config = config_dialog.config
                 
                 if config['direction'] == 'x':
-                    data = data[:, config['x0']:config['x1']].sum(axis=1)
+                    data = data[:, config['x0']:config['x1']+1].sum(axis=1)
                 elif config['direction'] == 'y':
-                    data = data[config['x0']:config['x1'], :].sum(axis=0)
+                    data = data[config['x0']:config['x1']+1, :].sum(axis=0)
 
             else:
                 data = [0]
@@ -399,7 +405,7 @@ class Window(QMainWindow):
                                 self.data2.get_ydata(), 
                                 self.fit_range, self.peaks, verbose=False)
             text += '#Green - {}:\n'.format(self.data2.get_label())
-        xf = numpy.arange(self.fit_range[0], self.fit_range[1])
+        xf = numpy.linspace(self.fit_range[0], self.fit_range[1], 1000)
         yf = tools.peaks_function(xf, *pars)
         self.dataf.set_xdata(xf)
         self.dataf.set_ydata(yf)
@@ -422,6 +428,45 @@ class Window(QMainWindow):
                     text += 's{} '.format(j)
             text += '\t{:.2f}\t {:.2f}\n'.format(pars[i], dp[i])
             self.text_fit.setPlainText(text)
+
+
+    def sum_clicked(self):
+        range_str = self.input_range.text()
+        if range_str == "":
+            ax_range = self.axes.get_xlim()
+            range_str = "{} {}".format(int(ax_range[0]), int(ax_range[1]) + 1)
+
+        range_str = range_str.replace(",", " ").replace(";", " ").replace(":", " ")
+        range_str = range_str.split()
+        r = []
+        try:
+            for s in range_str:
+                r.append(int(s))
+        except ValueError:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setText('Could not convert {} to int'.format(s))
+            error_dialog.setInformativeText('Range should be given as two integers separated by space, comma or semicolon e.g 300 600')
+            error_dialog.setWindowTitle("Error")
+            error_dialog.exec_()
+            return None
+
+        if len(r) > 1 and r[1] > r[0]:
+            self.sum_range[0] = r[0]
+            self.sum_range[1] = r[1]
+        else:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setText('Wrong range {}'.format(r))
+            error_dialog.setInformativeText('Range should be given as two integers separated by space, comma or semicolon e.g 300 600')
+            error_dialog.setWindowTitle("Error")
+            error_dialog.exec_()
+            return None
+
+        s = self.data0.get_ydata()[self.sum_range[0]:self.sum_range[1]+1].sum()
+        text = 'Range: [{}, {}]\n'.format(self.sum_range[0], self.sum_range[1])
+        text += 'Sum: {}'.format(s)
+        self.text_fit.setPlainText(text)
 
 
     def report_clicked(self):
