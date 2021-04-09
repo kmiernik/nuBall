@@ -188,40 +188,54 @@ class Window(QMainWindow):
         self.combo_spectrum.addItems(['Red', 'Blue', 'Green'])
         self.combo_spectrum.setCurrentText('Red')
 
+        self.button_add = QPushButton('R + B')
+        self.button_add.setFixedWidth(50)
+        self.button_add.clicked.connect(self.add_clicked)
+        self.button_add.setToolTip('Green = Red + Blue')
+
+        self.button_subtract = QPushButton('R - B')
+        self.button_subtract.setFixedWidth(50)
+        self.button_subtract.clicked.connect(self.subtract_clicked)
+        self.button_subtract.setToolTip('Green = Red - Blue')
+
         self.button_fit = QPushButton('Fit')
         self.button_fit.setFixedWidth(50)
         self.button_fit.clicked.connect(self.fit_clicked)
+        self.button_fit.setToolTip("Fit peaks")
 
         self.button_sum = QPushButton('Sum')
         self.button_sum.setFixedWidth(50)
         self.button_sum.clicked.connect(self.sum_clicked)
+        self.button_sum.setToolTip("Sum spectra within channels indicated by range")
 
-        self.button_report = QPushButton('Add to report')
+        self.button_report = QPushButton('Report')
         self.button_report.setFixedWidth(100)
         self.button_report.clicked.connect(self.report_clicked)
         self.button_report.setToolTip("Save fit results to 'report.txt'")
 
         layout = QGridLayout()
         layout.addWidget(self.button_load, 0, 0)
-        layout.addWidget(self.text_file, 0, 1, 1, 3)
+        layout.addWidget(self.text_file, 0, 2, 1, 3)
 
-        layout.addWidget(self.list_spectra, 1, 0, 2, 1)
-        layout.addWidget(self.canvas, 1, 1, 1, 5)
-        layout.addWidget(self.toolbar, 2, 1, 1, 5)
+        layout.addWidget(self.list_spectra, 1, 0, 2, 2)
+        layout.addWidget(self.canvas, 1, 2, 1, 5)
+        layout.addWidget(self.toolbar, 2, 2, 1, 5)
 
-        layout.addWidget(self.label_spectrum, 3, 0)
-        layout.addWidget(self.combo_spectrum, 4, 0)
+        layout.addWidget(self.label_spectrum, 3, 0, 1, 2)
+        layout.addWidget(self.combo_spectrum, 4, 0, 1, 2)
 
-        layout.addWidget(self.text_fit, 3, 4, 3, 1)
-        layout.addWidget(self.label_range, 3, 1)
-        layout.addWidget(self.input_range, 3, 2, 1, 2)
+        layout.addWidget(self.text_fit, 3, 5, 3, 1)
+        layout.addWidget(self.label_range, 3, 2)
+        layout.addWidget(self.input_range, 3, 3, 1, 2)
 
-        layout.addWidget(self.label_peaks, 4, 1)
-        layout.addWidget(self.input_peaks, 4, 2, 1, 2)
+        layout.addWidget(self.label_peaks, 4, 2)
+        layout.addWidget(self.input_peaks, 4, 3, 1, 2)
 
-        layout.addWidget(self.button_fit, 5, 2)
-        layout.addWidget(self.button_sum, 5, 3)
-        layout.addWidget(self.button_report, 5, 5)
+        layout.addWidget(self.button_add, 5, 0)
+        layout.addWidget(self.button_subtract, 5, 1)
+        layout.addWidget(self.button_fit, 5, 3)
+        layout.addWidget(self.button_sum, 5, 4)
+        layout.addWidget(self.button_report, 5, 6)
 
         main.setLayout(layout)
 
@@ -263,6 +277,8 @@ class Window(QMainWindow):
                     data = data[:, config['x0']:config['x1']+1].sum(axis=1)
                 elif config['direction'] == 'y':
                     data = data[config['x0']:config['x1']+1, :].sum(axis=0)
+
+                name += '_{}_{}'.format(config['x0'], config['x1'])
 
             else:
                 data = [0]
@@ -467,6 +483,47 @@ class Window(QMainWindow):
         text = 'Range: [{}, {}]\n'.format(self.sum_range[0], self.sum_range[1])
         text += 'Sum: {}'.format(s)
         self.text_fit.setPlainText(text)
+
+
+    def add_clicked(self):
+        if (self.data0.get_xdata().shape == self.data1.get_xdata().shape and
+            self.data0.get_ydata().shape == self.data1.get_ydata().shape):
+            self.data2.set_xdata(self.data0.get_xdata())
+            self.data2.set_ydata(self.data0.get_ydata() 
+                                 + self.data1.get_ydata())
+            self.data2.set_label('G+B')
+            self.axes.legend()
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+        else:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setText('Spectra shape mismatch')
+            error_dialog.setInformativeText('Red and Blue spectra must have the same shape in order to add them')
+            error_dialog.setWindowTitle("Error")
+            error_dialog.exec_()
+            return None
+
+
+    def subtract_clicked(self):
+        if (self.data0.get_xdata().shape == self.data1.get_xdata().shape and
+            self.data0.get_ydata().shape == self.data1.get_ydata().shape):
+            self.data2.set_xdata(self.data0.get_xdata())
+            g = numpy.array(self.data0.get_ydata(), dtype=numpy.int64)
+            g = g - self.data1.get_ydata()
+            self.data2.set_ydata(g)
+            self.data2.set_label('G-B')
+            self.axes.legend()
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+        else:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setText('Spectra shape mismatch')
+            error_dialog.setInformativeText('Red and Blue spectra must have the same shape in order to subtract them')
+            error_dialog.setWindowTitle("Error")
+            error_dialog.exec_()
+            return None
 
 
     def report_clicked(self):
