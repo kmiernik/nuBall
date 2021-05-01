@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import numpy
 import sys
 import h5py
@@ -208,6 +209,11 @@ class Window(QMainWindow):
         self.button_sum.clicked.connect(self.sum_clicked)
         self.button_sum.setToolTip("Sum spectra within channels indicated by range")
 
+        self.button_ascii = QPushButton('Ascii')
+        self.button_ascii.setFixedWidth(100)
+        self.button_ascii.clicked.connect(self.ascii_clicked)
+        self.button_ascii.setToolTip("Save current spectrum ascii file")
+
         self.button_report = QPushButton('Report')
         self.button_report.setFixedWidth(100)
         self.button_report.clicked.connect(self.report_clicked)
@@ -227,6 +233,7 @@ class Window(QMainWindow):
         layout.addWidget(self.text_fit, 3, 5, 3, 1)
         layout.addWidget(self.label_range, 3, 2)
         layout.addWidget(self.input_range, 3, 3, 1, 2)
+        layout.addWidget(self.button_ascii, 3, 6)
 
         layout.addWidget(self.label_peaks, 4, 2)
         layout.addWidget(self.input_peaks, 4, 3, 1, 2)
@@ -293,17 +300,17 @@ class Window(QMainWindow):
 
         x = numpy.arange(len(data)) + 0.5
         if self.combo_spectrum.currentText() == 'Red':
-            self.data0.set_xdata(x)
-            self.data0.set_ydata(data)
-            self.data0.set_label(name)
+            current = self.data0
         elif self.combo_spectrum.currentText() == 'Blue':
-            self.data1.set_xdata(x)
-            self.data1.set_ydata(data)
-            self.data1.set_label(name)
+            current = self.data1
         elif self.combo_spectrum.currentText() == 'Green':
-            self.data2.set_xdata(x)
-            self.data2.set_ydata(data)
-            self.data2.set_label(name)
+            current = self.data2
+        else:
+            return None
+
+        current.set_xdata(x)
+        current.set_ydata(data)
+        current.set_label(name)
 
         xmax0 = max(self.data0.get_xdata())
         xmax1 = max(self.data1.get_xdata())
@@ -529,6 +536,40 @@ class Window(QMainWindow):
     def report_clicked(self):
         with open("report.txt", "a") as report_file:
             report_file.write(self.text_fit.toPlainText())
+
+
+    def ascii_clicked(self):
+        if self.combo_spectrum.currentText() == 'Red':
+            current = self.data0
+        elif self.combo_spectrum.currentText() == 'Blue':
+            current = self.data1
+        elif self.combo_spectrum.currentText() == 'Green':
+            current = self.data2
+        else:
+            return None
+
+        label = current.get_label().replace('/', '_')
+        file_name = QFileDialog.getSaveFileName(self, "Select data file", 
+                                            "{}.txt".format(label),
+                                            "Text Files (*.txt);;All Files (*)")
+        if file_name[0] != '':
+            try:
+                
+                header = (datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n" + self.data_file.filename + "\n" + label)
+                numpy.savetxt(file_name[0], 
+                              numpy.column_stack((current.get_xdata(), 
+                                                  current.get_ydata())),
+                              header=header,
+                              delimiter=' ', fmt='%d')
+            except (FileNotFoundError, OSError, ValueError) as err:
+                error_dialog = QMessageBox()
+                error_dialog.setIcon(QMessageBox.Critical)
+                error_dialog.setText(
+                        'Could not save file {}'.format(file_name[0]))
+                error_dialog.setInformativeText(err.args[0])
+                error_dialog.setWindowTitle("Error")
+                error_dialog.exec_()
+                return None
 
 
 
