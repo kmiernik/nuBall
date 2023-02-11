@@ -4,6 +4,7 @@ import datetime
 import numpy
 import sys
 import h5py
+import os
 
 import matplotlib.pyplot as plt
 
@@ -534,8 +535,34 @@ class Window(QMainWindow):
 
 
     def report_clicked(self):
+        if not os.path.isfile("report.txt"):
+            with open("report.txt", "w") as report_file:
+                report_file.write("gate,a,da,b,db,x,dx,A,dA,s,ds\n")
+
         with open("report.txt", "a") as report_file:
-            report_file.write(self.text_fit.toPlainText())
+            lines = self.text_fit.toPlainText().splitlines()
+
+            gate_name = lines[0].split()[2].strip(":")
+            a = lines[1].split()[1]
+            da = lines[1].split()[2]
+            b = lines[2].split()[1]
+            db = lines[2].split()[2]
+
+            n = int(len(lines[3:]) / 3)
+            for i in range(n):
+                outline = (gate_name + "," 
+                        + a + "," 
+                        + da + "," 
+                        + b + "," 
+                        + db + "," 
+                        + lines[3*i+3].split()[1] + "," 
+                        + lines[3*i+3].split()[2] + "," 
+                        + lines[3*i+4].split()[1] + "," 
+                        + lines[3*i+4].split()[2] + "," 
+                        + lines[3*i+5].split()[1] + "," 
+                        + lines[3*i+5].split()[2]
+                        + "\n")
+                report_file.write(outline)
 
 
     def ascii_clicked(self):
